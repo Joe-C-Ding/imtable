@@ -26,17 +26,51 @@ function! LoadTable(jsonfile) abort	" {{{2
     let b:lkeys = keys(b:tabledict)->filter({_,v -> len(v) >= 3})->sort()
 endfunction
 
-function! Do() abort	" {{{2
-    let start = reltime()
-    call LoadTable(b:tablejson)
-    echo 'load elapsed:' reltimestr(reltime(start)).'s.'
-    for key in keys(b:tabledict)[0:10]
-	echo key.':' b:tabledict[key]
-    endfor
+augroup imtest
+    au!
+    au InsertCharPre * call Translate()
+augroup END
 
-    for k in b:lkeys[0:10]
-	echo k
-    endfor
+function! Translate() abort	" {{{2
+    if &iminsert == 2
+	let v:char = Convert(v:char)
+    endif
 endfunction
 
+let b:valid_char = split('a b c d e f g h i j k l m n o p q r s t u v w x y z')
+function! Convert(char) abort	" {{{2
+    if index(b:valid_char, a:char) < 0
+	return a:char
+    endif
+
+    let l:code = a:char
+    while v:true
+	let l:char = getchar()
+	if type(l:char) ==# v:t_number
+	    let l:char = nr2char(l:char)
+	    if index(b:valid_char, l:char) < 0
+		return ChoseCode(l:code, l:char)
+	    elseif len(l:code) < 4
+		let l:code ..= l:char
+	    else
+		call feedkeys(l:char, 'i')
+		return ChoseCode(l:code, ' ')
+	    endif
+	else
+	    return ChoseCode(l:code, l:char)
+	endif
+    endwhile
+endfunction
+
+function! ChoseCode(code, char) abort	" {{{2
+    if has_key(b:tabledict, a:code)
+	if a:char == ' '
+	    return b:tabledict[a:code][0]
+	else
+	    return b:tabledict[a:code][0] .. a:char
+	endif
+    else
+	return a:char
+    endif
+endfunction
 
