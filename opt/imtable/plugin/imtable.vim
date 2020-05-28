@@ -2,9 +2,12 @@
 " Language:	Vim-script
 " Maintainer:	Joe Ding
 " Version:	0.1
-" Last Change:	2020-05-28 01:48:17
+" Last Change:	2020-05-29 01:37:47
 
 if &cp || exists("g:loaded_imtable")
+    finish
+elseif v:version < 802
+    echoerr 'Error: imtable only supports Vim-8.2 or later.'
     finish
 endif
 let g:loaded_imtable = 1
@@ -27,7 +30,7 @@ let s:table = {}
 function! s:LoadTable() abort	" {{{1
     " do not overwrite if table exists.
     if empty(s:table)
-	let l:json = substitute(g:table_def, 'txt$', 'json', '')
+	let l:json = substitute(g:im_table_def, 'txt$', 'json', '')
 	let s:table = js_decode(readfile(l:json)[0])
     endif
 endfunction
@@ -57,7 +60,7 @@ function! TableConvert() abort
 	    if empty(l:code)
 		return s:Finalize('', '')
 	    endif
-	
+
 	elseif l:char == g:im_toggle_chinese_punct
 	    let g:im_disable_chinese_punct = !g:im_disable_chinese_punct
 	    continue
@@ -87,16 +90,20 @@ function! s:Finalize(code, char) abort	" {{{2
     call popup_close(s:popid)
     let s:popid = -1
 
+    " <Esc> to cancel input
     if a:char == "\<Esc>"
 	let v:char = ''
 
+    " if configures so, <CR> submits the code itself
+    elseif a:char == "\<CR>" && g:im_enter_submit
+	let v:char = a:code
+
     else
 	let l:cand = s:GetCandidates(a:code)
-	let l:char = s:HandlePunct(a:char)
 
-	let l:idx = index(g:im_select_keys, l:char)
+	let l:idx = index(g:im_select_keys, a:char)
 	if l:idx < 0 || l:idx >= len(l:cand)
-	    let v:char = get(l:cand, 0, '') .. l:char
+	    let v:char = get(l:cand, 0, '') .. s:HandlePunct(a:char)
 	else
 	    let v:char = l:cand[l:idx]
 	endif
@@ -115,6 +122,10 @@ function! s:GetCandidates(code) abort	" {{{2
 	return [s:prev_word]
 
     else
+	" make a beep for empty code 
+	if len(a:code) == 4
+	    norm! 
+	endif
 	return []
     endif
 endfunction
