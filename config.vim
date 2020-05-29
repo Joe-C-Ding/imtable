@@ -2,7 +2,7 @@
 " Language:	Vim-script
 " Maintainer:	Joe Ding
 " Version:	0.1
-" Last Change:	2020-05-29 01:33:03
+" Last Change:	2020-05-29 10:29:04
 
 " keys that are valid for input composing.
 if !exists('g:im_valid_keys')
@@ -14,6 +14,11 @@ if !exists('g:im_select_keys')
     let g:im_select_keys = [' ', ';', "'", '4', '5', '6', '7', '8', '9', '0']
 endif
 
+" key used to start temporary English mode.
+if !exists('g:im_temp_english_key')
+    let g:im_temp_english_key = ';'
+endif
+
 " if 1, use <Enter> to submit the code itself.
 " if 0, <Enter> submit the first candidate, and then insert a <Enter> itself.
 if !exists('g:im_enter_submit')
@@ -21,7 +26,8 @@ if !exists('g:im_enter_submit')
 endif
 
 " Chinese punctuation.
-" the toggle key must not be one of the valid_keys or select_keys.
+" the toggle key should not be one of the valid_keys or select_keys, or 
+" overwrites them.
 if !exists('g:im_disable_chinese_punct')
     let g:im_disable_chinese_punct = 0
 endif
