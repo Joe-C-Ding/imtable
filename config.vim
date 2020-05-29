@@ -2,7 +2,7 @@
 " Language:	Vim-script
 " Maintainer:	Joe Ding
 " Version:	0.1
-" Last Change:	2020-05-29 10:29:04
+" Last Change:	2020-05-29 21:36:39
 
 " keys that are valid for input composing.
 if !exists('g:im_valid_keys')
@@ -37,7 +37,7 @@ if !exists('g:im_toggle_chinese_punct')
 endif
 
 if !exists('g:im_chinese_puncts')
-let g:im_chinese_puncts = {
+    let g:im_chinese_puncts = {
 	\',': '，',
 	\'.': '。',
 	\'?': '？',
@@ -45,13 +45,6 @@ let g:im_chinese_puncts = {
 	\'\': '、',
 	\'^': '……',
 	\'_': '——',
-	\'<': '《',
-	\'>': '》',
-	\'(': '（',
-	\')': '）',
-	\'$': '¥',
-	\'`': '·',
-	\'~': '〜',
 	\}
 endif
 
