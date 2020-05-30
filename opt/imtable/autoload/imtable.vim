@@ -2,7 +2,7 @@
 " Language:	Vim-script
 " Maintainer:	Joe Ding
 " Version:	0.1
-" Last Change:	2020-05-29 12:06:13
+" Last Change:	2020-05-30 10:57:32
 
 " read configurations.
 exec 'so ' .. substitute(expand('<sfile>:p:h'), 'opt.*', 'config.vim', '')
@@ -54,7 +54,7 @@ function! imtable#TableConvert() abort
 	else
 	    if index(g:im_valid_keys, l:char) < 0
 		return s:Finalize(l:code, l:char)
-	    elseif len(l:code) < 4
+	    elseif len(l:code) < g:im_max_code_length
 		let l:code ..= l:char
 	    else
 		call feedkeys(l:char, 'i')
@@ -75,8 +75,12 @@ endfunction
 let s:prev_word = ''
 " close the popup-window, and determine candidates.
 function! s:Finalize(code, char) abort	" {{{2
-    call popup_close(s:popid)
-    let s:popid = -1
+    if s:popid == -1
+	return
+    else
+	call popup_close(s:popid)
+	let s:popid = -1
+    endif
 
     " <Esc> to cancel input
     if a:char == "\<Esc>"
@@ -113,7 +117,7 @@ function! s:GetCandidates(code, padding=0) abort	" {{{2
 
     else
 	" make a beep for empty code 
-	if len(a:code) == 4
+	if len(a:code) == g:im_max_code_length
 	    norm! 
 	endif
 	let l:cand = []

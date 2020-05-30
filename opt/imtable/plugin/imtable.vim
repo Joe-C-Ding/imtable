@@ -2,7 +2,7 @@
 " Language:	Vim-script
 " Maintainer:	Joe Ding
 " Version:	0.1
-" Last Change:	2020-05-29 10:23:37
+" Last Change:	2020-05-30 11:34:12
 
 if &cp || exists("g:loaded_imtable")
     finish
@@ -28,6 +28,8 @@ augroup im_autocmd
     au VimEnter * call imtable#LoadTable()
     au InsertCharPre * call imtable#TableConvert()
 augroup END
+
+command IMRebuildTable call imtable#build#BuildTable()
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

@@ -2,7 +2,12 @@
 " Language:	Vim-script
 " Maintainer:	Joe Ding
 " Version:	0.1
-" Last Change:	2020-05-29 21:36:39
+" Last Change:	2020-05-30 11:57:04
+
+" for wubi, max code length should be 4.
+if !exists('g:im_max_code_length')
+    let g:im_max_code_length = 4
+endif
 
 " keys that are valid for input composing.
 if !exists('g:im_valid_keys')
@@ -26,7 +31,7 @@ if !exists('g:im_enter_submit')
 endif
 
 " Chinese punctuation.
-" the toggle key should not be one of the valid_keys or select_keys, or 
+" the toggle key should not be one of the valid_keys or select_keys, or
 " overwrites them.
 if !exists('g:im_disable_chinese_punct')
     let g:im_disable_chinese_punct = 0
@@ -49,6 +54,18 @@ if !exists('g:im_chinese_puncts')
 endif
 
 " path to the table definition.
+" if set this to another file or the file contents are changed, the table needs
+" to be rebuild before it can take effects.
+" to rebuild it, execute
+"   :IMRebuildTable
+"
+" the format of each line the table file is:
+"   code	word	frequent
+" `code` must be at first column, and fields are split by "\t"
+" if different `word`s share the same `code`, the higher the `frequent` the
+"   closer it will be to the top of the candidates during typing.
+"
+" NOTE: the maximum of `frequent` is 2^31 - 1 = 2147483647
 if !exists('g:im_table_def')
     let g:im_table_def = expand('<sfile>:p:h') .. '/table/wubi86.txt'
 endif
