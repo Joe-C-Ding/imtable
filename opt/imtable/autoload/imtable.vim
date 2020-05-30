@@ -2,7 +2,7 @@
 " Language:	Vim-script
 " Maintainer:	Joe Ding
 " Version:	0.1
-" Last Change:	2020-05-30 10:57:32
+" Last Change:	2020-05-30 23:14:44
 
 " read configurations.
 exec 'so ' .. substitute(expand('<sfile>:p:h'), 'opt.*', 'config.vim', '')
@@ -116,7 +116,7 @@ function! s:GetCandidates(code, padding=0) abort	" {{{2
 	let l:cand = [s:prev_word]
 
     else
-	" make a beep for empty code 
+	" make a beep for empty code
 	if len(a:code) == g:im_max_code_length
 	    norm! 
 	endif
