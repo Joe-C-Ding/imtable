@@ -2,7 +2,7 @@
 " Language:	Vim-script
 " Maintainer:	Joe Ding
 " Version:	0.1
-" Last Change:	2020-05-30 23:14:44
+" Last Change:	2020-05-31 23:46:01
 
 " read configurations.
 exec 'so ' .. substitute(expand('<sfile>:p:h'), 'opt.*', 'config.vim', '')
@@ -22,16 +22,38 @@ let s:popid = -1
 let s:popopt = #{pos: 'topleft', border: [], maxheight: 11, scrollbar: 0}
 
 function! imtable#TableConvert() abort
-    " for imisert, see |iminsert|
+    " for details, see |iminsert|
     if &iminsert != 2
 	return
-    else
-	" put this char back for next read.
-	call feedkeys(v:char, 'i')
     endif
 
-    let l:code = ''
-    let s:popid = -1
+    if index(g:im_valid_keys, v:char) < 0
+	return s:PassThrough(v:char)
+    else
+	return s:ConvertStart(v:char)
+    endif
+endfunction
+
+function! s:PassThrough(char) abort	" {{{2
+    " there are several cases need to handle
+    if a:char == g:im_toggle_chinese_punct
+	let g:im_disable_chinese_punct = !g:im_disable_chinese_punct
+	let v:char = ''
+
+    elseif a:char == g:im_temp_english_key
+	call s:TempEnglish()
+
+    else
+	let v:char = s:HandlePunct(a:char)
+
+    endif
+endfunction
+
+function! s:ConvertStart(first) abort	" {{{2
+    let l:code = a:first
+    let s:popid = popup_atcursor(s:GetCandidates(l:code, 1), s:popopt)
+    redraw
+
     while v:true
 	let l:char = getchar()
 	if type(l:char) ==# v:t_number
@@ -43,9 +65,6 @@ function! imtable#TableConvert() abort
 	    if empty(l:code)
 		return s:Finalize('', '')
 	    endif
-
-	elseif l:char == g:im_temp_english_key && len(l:code) == 0
-	    return s:TempEnglish()
 
 	elseif l:char == g:im_toggle_chinese_punct
 	    let g:im_disable_chinese_punct = !g:im_disable_chinese_punct
@@ -62,25 +81,17 @@ function! imtable#TableConvert() abort
 	    endif
 	endif
 
-	let l:poptext = [l:code .. ':'] + s:GetCandidates(l:code, 1)
-	if s:popid < 0
-	    let s:popid = popup_atcursor(l:poptext, s:popopt)
-	else
-	    call popup_settext(s:popid, l:poptext)
-	endif
+	call popup_settext(s:popid, s:GetCandidates(l:code, 1))
 	redraw
     endwhile
 endfunction
 
+
 let s:prev_word = ''
 " close the popup-window, and determine candidates.
 function! s:Finalize(code, char) abort	" {{{2
-    if s:popid == -1
-	return
-    else
-	call popup_close(s:popid)
-	let s:popid = -1
-    endif
+    call popup_close(s:popid)
+    let s:popid = -1
 
     " <Esc> to cancel input
     if a:char == "\<Esc>"
@@ -125,6 +136,7 @@ function! s:GetCandidates(code, padding=0) abort	" {{{2
 
     return !a:padding ? l:cand :
 	\copy(l:cand)->map({k,v -> printf('%d. %s',(k+1)%10, v)})
+	\->insert(a:code .. ':')
 endfunction
 
 " translate punctuation based on configs.
